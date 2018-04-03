@@ -8,8 +8,8 @@ import sys
 import os
 import datetime
 
-#class GeohashingComic():
-class GeohashingComic:
+
+class GeohashingComic(object):
     # the final image
     im = None
 
