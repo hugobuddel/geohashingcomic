@@ -167,7 +167,7 @@ class GeohashingComic(object):
         print d
 
 
-if __name__ == '__main__':
+def main():
     arg = ''
     try:
         arg = urllib.unquote(os.environ['QUERY_STRING'])
@@ -241,3 +241,7 @@ if __name__ == '__main__':
         gc.cgi()
     else:
         gc.show()
+
+
+if __name__ == '__main__':
+    main()
