@@ -56,23 +56,20 @@ class GeohashingComic(object):
         }
 
         # write down the year
-        for i in range(4):
-            c = str(self.year)[i]
+        for i, c in enumerate("{:04d}".format(self.year)):
             self.im.paste(digits[c], (24 + 12 * i, 78))
+
         # write down the month
-        for i in range(2):
-            c = ("{:02d}".format(self.month))[i]
+        for i, c in enumerate("{:02d}".format(self.month)):
             self.im.paste(digits[c], (88 + 11 * i, 78))
+
         # write down the day
-        for i in range(2):
-            c = ("{:02d}".format(self.day))[i]
+        for i, c in enumerate("{:02d}".format(self.day)):
             self.im.paste(digits[c], (120 + 12 * i, 78))
 
         # write down the dow jones
         hofs = 165
-        for i in range(8):
-            # c = ("%08.2f"%(self.dowjones))[i]
-            c = ("{:8.2f}".format(self.dowjones))[i]
+        for i, c in enumerate("{:8.2f}".format(self.dowjones)):
             if i == 1:  # this is a 1
                 hofs -= 3
             if i == 5:  # after the dot
@@ -88,6 +85,7 @@ class GeohashingComic(object):
             hofs += digits[c].size[0]
         hofs += 14
         hofs2 = 466
+
         # write second half hash
         for c in hexdig[16:32]:
             self.im.paste(digits[c], (hofs, 82))
@@ -97,9 +95,8 @@ class GeohashingComic(object):
 
         # write latitude
         hofs = 25
-        for i in range(10):
-            c = ("{:+10.6f}".format(self.lat))[i]
-            if not ((c == ' ') or (c == '+') or (c == '.')):
+        for i, c in enumerate("{:+10.6f}".format(self.lat)):
+            if c not in ' +.':
                 self.im.paste(digits[c], (hofs, 168))
                 if i < 3:
                     self.im.paste(digits[c], (hofs + 110, 266))
@@ -117,9 +114,8 @@ class GeohashingComic(object):
 
         # write longitude
         hofs = 143
-        for i in range(11):
-            c = ("{:+11.6f}".format(self.lon))[i]
-            if not ((c == ' ') or (c == '+') or (c == '.')):
+        for i, c in enumerate("{:+11.6f}".format(self.lon)):
+            if c not in ' +.':
                 self.im.paste(digits[c], (hofs, 169))
                 if i < 4:
                     self.im.paste(digits[c], (hofs + 138, 269))
@@ -136,13 +132,11 @@ class GeohashingComic(object):
                 hofs -= 2
 
         # lat/lon in final coordinates
-        for i in range(6):
-            c = str(lato)[i + 2]
-            self.im.paste(digits[c], (300 + 10 * i, 174))
-            self.im.paste(digits[c], (176 + 10 * i, 267))
-            c = str(lono)[i + 2]
-            self.im.paste(digits[c], (450 + 10 * i, 174))
-            self.im.paste(digits[c], (335 + 10 * i, 269))
+        for i, (c1, c2) in enumerate(zip(str(lato)[2:8], str(lono)[2:8])):
+            self.im.paste(digits[c1], (300 + 10 * i, 174))
+            self.im.paste(digits[c1], (176 + 10 * i, 267))
+            self.im.paste(digits[c2], (450 + 10 * i, 174))
+            self.im.paste(digits[c2], (335 + 10 * i, 269))
 
     def show(self):
         """
