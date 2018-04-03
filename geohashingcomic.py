@@ -11,6 +11,7 @@ import urllib
 import sys
 import os
 import datetime
+from PIL import Image
 
 
 class GeohashingComic(object):
@@ -34,8 +35,8 @@ class GeohashingComic(object):
         self.lat = lat
         self.lon = lon
 
-        self.im = None
-        # The final image
+        self.im = Image.open("geohashingclean.png")
+        # The final image.
 
     def make(self):
         """Creating the image"""
@@ -48,16 +49,11 @@ class GeohashingComic(object):
         lato = struct.unpack(">Q", digest[0:8])[0] / (2. ** 64)
         lono = struct.unpack(">Q", digest[8:16])[0] / (2. ** 64)
 
-        # initialize the image
-        from PIL import Image
-        self.im = Image.open("geohashingclean.png")
-
         # read the digits (and the -), the dots don't move
-        digits = {}
-        for c in "0123456789abcdefm":
-            cim = Image.open(c + ".png")
-            digits[c] = cim
-        digits['-'] = digits['m']
+        digits = {
+            c: Image.open(c.replace("-", "m") + ".png")
+            for c in "0123456789abcdef-"
+        }
 
         # write down the year
         for i in range(4):
