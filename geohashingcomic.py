@@ -13,7 +13,7 @@ import datetime
 class GeohashingComic:
     # the final image
     im = None
-    
+
     def __init__(self,
         year = 2005,
         month = 5,
@@ -29,11 +29,11 @@ class GeohashingComic:
         self.dowjones = dowjones
         self.lat = lat
         self.lon = lon
-        
+
     def make(self):
         """Creating the image"""
 
-	# calculate the hash and new latitude and longitude
+        # calculate the hash and new latitude and longitude
         #inp = "%4i-%02i-%02i-%8.2f" % (self.year,self.month,self.day,self.dowjones)
         inp = "%4i-%02i-%02i-%0.2f" % (self.year,self.month,self.day,self.dowjones)
         #mhash = hashlib.md5(inp)
@@ -42,11 +42,11 @@ class GeohashingComic:
         sum = mhash.digest()
         lato = struct.unpack(">Q", sum[0:8])[0] / (2.**64)
         lono = struct.unpack(">Q", sum[8:16])[0] / (2.**64)
- 
+
         # initialize the image
         from PIL import Image
         self.im = Image.open("geohashingclean.png")
-        
+
         # read the digits (and the -), the dots don't move
         digits = {}
         for c in "0123456789abcdefm":
@@ -54,7 +54,7 @@ class GeohashingComic:
             digits[c] = cim
         digits['-'] = digits['m']
 
-	# write down the year        
+        # write down the year
         for i in range(4):
             c = str(self.year)[i]
             self.im.paste(digits[c],(24+12*i, 78))
@@ -66,8 +66,8 @@ class GeohashingComic:
         for i in range(2):
             c = ("%02i"%(self.day))[i]
             self.im.paste(digits[c],(120+12*i, 78))
-       
-	# write down the dow jones 
+
+        # write down the dow jones
         hofs = 165
         for i in range(8):
             #c = ("%08.2f"%(self.dowjones))[i]
@@ -78,7 +78,7 @@ class GeohashingComic:
                 hofs -= 3
             if not (c == '.' or c ==' '): # do not do the dot or spaces
                 self.im.paste(digits[c],(hofs+10*i, 78))
-        
+
         # write first half hash
         hofs = 301
         for c in hexdig[0:16]:
@@ -87,13 +87,13 @@ class GeohashingComic:
             hofs+=digits[c].size[0]
         hofs += 14
         hofs2 = 466
-	# write second half hash
+        # write second half hash
         for c in hexdig[16:32]:
             self.im.paste(digits[c],(hofs, 82))
             self.im.paste(digits[c],(hofs2, 129))
             hofs+=digits[c].size[0]
             hofs2+=digits[c].size[0]
-        
+
         # write latitude
         hofs = 25
         for i in range(10):
@@ -113,7 +113,7 @@ class GeohashingComic:
                 hofs -= 1
             if c == ' ':
                 hofs -= 2
-        
+
         # write longitude
         hofs = 143
         for i in range(11):
@@ -133,7 +133,7 @@ class GeohashingComic:
                 hofs -= 2
             if c == ' ':
                 hofs -= 2
-        
+
         # lat/lon in final coordinates
         for i in range(6):
             c = str(lato)[i+2]
@@ -142,7 +142,7 @@ class GeohashingComic:
             c = str(lono)[i+2]
             self.im.paste(digits[c],(450+10*i, 174))
             self.im.paste(digits[c],(335+10*i, 269))
-    
+
     def show(self):
         if not self.im:
             self.make()
@@ -156,10 +156,10 @@ class GeohashingComic:
         #self.im.save('/dev/stdout',format)
         fn = "comics/%i-%i-%i_%f_%f_%f.png"%(self.year,self.month,self.day,self.dowjones,self.lat,self.lon)
         self.im.save(fn,format)
-	oo = open(fn)
-	d = oo.read()
-	oo.close()
-	print d
+        oo = open(fn)
+        d = oo.read()
+        oo.close()
+        print d
 
 
 if __name__ == '__main__':
@@ -183,7 +183,7 @@ if __name__ == '__main__':
         'dowjones': 0.0,
         'lat': 37.421542,
         'lon': -122.085589,
-    } 
+    }
 
     try:
         al = arg.split('&')
@@ -219,12 +219,12 @@ if __name__ == '__main__':
         args['lon'] = float(args['lon'])
 
     if not args['dowjones']:
-	w30 = 0
+        w30 = 0
         date = datetime.date(args['year'], args['month'], args['day'])
         if (args['lon']>-30) and (date >= datetime.date(2008,05,27)):
             w30 = 1
         djia = urllib.urlopen((date - datetime.timedelta(w30)).strftime("http://irc.peeron.com/xkcd/map/data/%Y/%m/%d")).read()
-	if djia.find('404 Not Found') >= 0: 
+        if djia.find('404 Not Found') >= 0:
             args['dowjones'] = 0.0
         else:
             args['dowjones'] = float(djia)
