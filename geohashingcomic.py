@@ -41,7 +41,7 @@ class GeohashingComic(object):
         """Creating the image"""
 
         # calculate the hash and new latitude and longitude
-        inp = "%4i-%02i-%02i-%0.2f" % (self.year, self.month, self.day, self.dowjones)
+        inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.year, self.month, self.day, self.dowjones)
         mhash = hashlib.md5(inp)
         hexdig = mhash.hexdigest()
         digest = mhash.digest()
@@ -168,7 +168,8 @@ class GeohashingComic(object):
         print "Content-Type: image/png\r\n\r\n",
         # there should be a better way to do this
         # self.im.save('/dev/stdout',format)
-        fn = "comics/%i-%i-%i_%f_%f_%f.png" % (self.year, self.month, self.day, self.dowjones, self.lat, self.lon)
+        fn = "comics/{:d}-{:d}-{:d}_{:f}_{:f}_{:f}.png".format(
+            self.year, self.month, self.day, self.dowjones, self.lat, self.lon)
         self.im.save(fn, format)
         oo = open(fn)
         d = oo.read()
