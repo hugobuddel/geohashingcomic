@@ -231,3 +231,5 @@ if __name__ == '__main__':
     gc.make()
     if mode == 'cgi':
         gc.cgi()
+    else:
+        gc.show()
