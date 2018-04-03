@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-#import hashlib # not in 2.4
-import md5
+import hashlib
 import struct
 import urllib
 import sys
@@ -36,8 +35,7 @@ class GeohashingComic:
         # calculate the hash and new latitude and longitude
         #inp = "%4i-%02i-%02i-%8.2f" % (self.year,self.month,self.day,self.dowjones)
         inp = "%4i-%02i-%02i-%0.2f" % (self.year,self.month,self.day,self.dowjones)
-        #mhash = hashlib.md5(inp)
-        mhash = md5.md5(inp)
+        mhash = hashlib.md5(inp)
         hexdig = mhash.hexdigest()
         sum = mhash.digest()
         lato = struct.unpack(">Q", sum[0:8])[0] / (2.**64)
@@ -233,4 +231,3 @@ if __name__ == '__main__':
     gc.make()
     if mode == 'cgi':
         gc.cgi()
-
