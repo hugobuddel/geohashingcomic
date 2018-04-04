@@ -70,7 +70,7 @@ class CommandLineTest(unittest.TestCase):
         """
         Setup environment as-if this is a commandline environment.
         """
-        sys.argv.append("year&lat=-1&lot=0")
+        sys.argv.append("lat=-1&lon=-31&year")
 
     def tearDown(self):
         """
