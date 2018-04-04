@@ -100,10 +100,13 @@ class GeohashingComic(object):
         """
         hofs = 165
         for i, c in enumerate("{:8.2f}".format(self.gh.dowjones)):
-            if i == 1:  # this is a 1
-                hofs -= 3
-            if i == 5:  # after the dot
-                hofs -= 3
+
+            checks_raw = [
+                (i == 1, -3),  # does this work properly when the DJ is above 20000?
+                (i == 5, -3),  # after the dot
+            ]
+            offset_change = sum(change for check, change in checks_raw if check)
+            hofs += offset_change
             if not (c == '.' or c == ' '):  # do not do the dot or spaces
                 self.im.paste(self.digits[c], (hofs + 10 * i, 78))
 
@@ -135,16 +138,17 @@ class GeohashingComic(object):
                 self.im.paste(self.digits[c], (hofs, 168))
                 if i < 3:
                     self.im.paste(self.digits[c], (hofs + 110, 266))
-            for check, change in [
+
+            checks_raw = [
                 (True, 10),
                 (c == '1' and i > 3, -5),
                 (c == '.', 2),
                 (c == '-', -1),
                 (c == '+', -1),
                 (c == ' ', -2),
-            ]:
-                if check:
-                    hofs += change
+            ]
+            offset_change = sum(change for check, change in checks_raw if check)
+            hofs += offset_change
 
     def draw_longitude(self):
         """
@@ -157,16 +161,16 @@ class GeohashingComic(object):
                 if i < 4:
                     self.im.paste(self.digits[c], (hofs + 138, 269))
 
-            for check, change in [
+            checks_raw = [
                 (True, 10),
                 (c == '1' and i > 4, -5),
                 (c == '.', 3),
                 (c == '-', -1),
                 (c == '+', -2),
                 (c == ' ', -2),
-            ]:
-                if check:
-                    hofs += change
+            ]
+            offset_change = sum(change for check, change in checks_raw if check)
+            hofs += offset_change
 
     def draw_coordinate_decimals(self):
         """
