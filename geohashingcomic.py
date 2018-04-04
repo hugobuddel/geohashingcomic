@@ -170,7 +170,9 @@ class GeohashingComic(object):
                 (c == ' ', -2),
             ]
             offset_change = sum(change for check, change in checks_raw if check)
-            hofs += offset_change
+            offset_change2 = sum(change for check, change in checks_raw if check)
+            offset_change3 = sum(change for check, change in checks_raw if check)
+            hofs += offset_change + offset_change2 - offset_change3
 
     def draw_coordinate_decimals(self):
         """
