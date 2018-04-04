@@ -92,14 +92,14 @@ class ManualTest(unittest.TestCase):
         """
         Test some manual input.
         """
-        gc = GeohashingComic(datetime.date(2009, 5, 26), lat=1, lon=+29, dowjones=0)
+        gc = GeohashingComic(datetime.date(2009, 5, 26), location=(1, +29), dowjones=0)
         gc.show()
 
     def test3(self):
         """
         Test some manual input.
         """
-        gc = GeohashingComic(datetime.date(2009, 5, 26), lat=1, lon=-29)
+        gc = GeohashingComic(datetime.date(2009, 5, 26), location=(1, -29))
         gc.cgi()
 
     def tearDown(self):
