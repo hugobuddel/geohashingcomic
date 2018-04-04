@@ -35,11 +35,13 @@ class GeohashingComic(object):
         self.lat = lat
         self.lon = lon
 
-        self.im = Image.open("geohashingclean.png")
+        self.im = None
         # The final image.
 
     def make(self):
         """Creating the image"""
+
+        self.im = Image.open("geohashingclean.png")
 
         # calculate the hash and new latitude and longitude
         inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.year, self.month, self.day, self.dowjones)
@@ -175,7 +177,7 @@ def main():
     except KeyError:
         if len(sys.argv) > 1:
             # arg = sys.argv[1]
-            arg = urllib.unquote(sys.argv[1])
+            arg = urllib.unquote(sys.argv[-1])
         else:
             arg = ''
         mode = 'cmd'
@@ -213,15 +215,8 @@ def main():
     args['month'] = int(args['month'])
     args['day'] = int(args['day'])
     args['dowjones'] = float(args['dowjones'])
-    # -0 should not happen because you are supposed to enter floats, but still
-    if args['lat'] == '-0':
-        args['lat'] = -0.0
-    else:
-        args['lat'] = float(args['lat'])
-    if args['lon'] == '-0':
-        args['lon'] = -0.0
-    else:
-        args['lon'] = float(args['lon'])
+    args['lat'] = float(args['lat'])
+    args['lon'] = float(args['lon'])
 
     if not args['dowjones']:
         w30 = 0
