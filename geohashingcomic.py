@@ -23,7 +23,7 @@ class Geohashing(object):
                  year=2005,
                  month=5,
                  day=26,
-                 dowjones=10458.68,
+                 dowjones=0.0,
                  lat=37.421542,
                  lon=-122.085589,
                  ):
@@ -31,9 +31,21 @@ class Geohashing(object):
         self.year = year
         self.month = month
         self.day = day
-        self.dowjones = dowjones
         self.lat = lat
         self.lon = lon
+        self.dowjones = dowjones
+
+        if not self.dowjones:
+            w30 = 0
+            date = datetime.date(self.year, self.month, self.day)
+            if (self.lon > -30) and (date >= datetime.date(2008, 05, 27)):
+                w30 = 1
+            djia = urllib.urlopen(
+                (date - datetime.timedelta(w30)).strftime("http://irc.peeron.com/xkcd/map/data/%Y/%m/%d")).read()
+            if djia.find('404 Not Found') >= 0:
+                self.dowjones = 0.0
+            else:
+                self.dowjones = float(djia)
 
         # calculate the hash and new latitude and longitude
         inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.year, self.month, self.day, self.dowjones)
@@ -42,7 +54,6 @@ class Geohashing(object):
         digest = mhash.digest()
         self.lato = struct.unpack(">Q", digest[0:8])[0] / (2. ** 64)
         self.lono = struct.unpack(">Q", digest[8:16])[0] / (2. ** 64)
-
 
 
 class GeohashingComic(object):
@@ -62,9 +73,13 @@ class GeohashingComic(object):
         self.year = year
         self.month = month
         self.day = day
-        self.dowjones = dowjones
         self.lat = lat
         self.lon = lon
+
+        # calculate the hash and new latitude and longitude
+        self.gh = Geohashing(self.year, self.month, self.day, dowjones, self.lat, self.lon)
+
+        self.dowjones = self.gh.dowjones
 
         self.im = None
         # The final image.
@@ -73,9 +88,6 @@ class GeohashingComic(object):
         """Creating the image"""
 
         self.im = Image.open("geohashingclean.png")
-
-        # calculate the hash and new latitude and longitude
-        gh = Geohashing(self.year, self.month, self.day, self.dowjones)
 
         # read the digits (and the -), the dots don't move
         digits = {
@@ -107,7 +119,7 @@ class GeohashingComic(object):
 
         # write first half hash
         hofs = 301
-        for c in gh.hexdig[0:16]:
+        for c in self.gh.hexdig[0:16]:
             self.im.paste(digits[c], (hofs, 82))
             self.im.paste(digits[c], (hofs - 9, 129))
             hofs += digits[c].size[0]
@@ -115,7 +127,7 @@ class GeohashingComic(object):
         hofs2 = 466
 
         # write second half hash
-        for c in gh.hexdig[16:32]:
+        for c in self.gh.hexdig[16:32]:
             self.im.paste(digits[c], (hofs, 82))
             self.im.paste(digits[c], (hofs2, 129))
             hofs += digits[c].size[0]
@@ -160,7 +172,7 @@ class GeohashingComic(object):
                 hofs -= 2
 
         # lat/lon in final coordinates
-        for i, (c1, c2) in enumerate(zip(str(gh.lato)[2:8], str(gh.lono)[2:8])):
+        for i, (c1, c2) in enumerate(zip(str(self.gh.lato)[2:8], str(self.gh.lono)[2:8])):
             self.im.paste(digits[c1], (300 + 10 * i, 174))
             self.im.paste(digits[c1], (176 + 10 * i, 267))
             self.im.paste(digits[c2], (450 + 10 * i, 174))
@@ -243,18 +255,6 @@ def main():
     args['dowjones'] = float(args['dowjones'])
     args['lat'] = float(args['lat'])
     args['lon'] = float(args['lon'])
-
-    if not args['dowjones']:
-        w30 = 0
-        date = datetime.date(args['year'], args['month'], args['day'])
-        if (args['lon'] > -30) and (date >= datetime.date(2008, 05, 27)):
-            w30 = 1
-        djia = urllib.urlopen(
-            (date - datetime.timedelta(w30)).strftime("http://irc.peeron.com/xkcd/map/data/%Y/%m/%d")).read()
-        if djia.find('404 Not Found') >= 0:
-            args['dowjones'] = 0.0
-        else:
-            args['dowjones'] = float(djia)
 
     gc = GeohashingComic(args['year'], args['month'], args['day'], args['dowjones'], args['lat'], args['lon'])
     gc.make()
