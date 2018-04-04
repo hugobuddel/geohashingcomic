@@ -14,6 +14,37 @@ import datetime
 from PIL import Image
 
 
+class Geohashing(object):
+    """
+    Class to create Geohashing Comics for any date.
+    """
+
+    def __init__(self,
+                 year=2005,
+                 month=5,
+                 day=26,
+                 dowjones=10458.68,
+                 lat=37.421542,
+                 lon=-122.085589,
+                 ):
+        """year, month, day as ints, dowjones, lat, lon as floats"""
+        self.year = year
+        self.month = month
+        self.day = day
+        self.dowjones = dowjones
+        self.lat = lat
+        self.lon = lon
+
+        # calculate the hash and new latitude and longitude
+        inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.year, self.month, self.day, self.dowjones)
+        mhash = hashlib.md5(inp)
+        self.hexdig = mhash.hexdigest()
+        digest = mhash.digest()
+        self.lato = struct.unpack(">Q", digest[0:8])[0] / (2. ** 64)
+        self.lono = struct.unpack(">Q", digest[8:16])[0] / (2. ** 64)
+
+
+
 class GeohashingComic(object):
     """
     Class to create Geohashing Comics for any date.
@@ -44,12 +75,7 @@ class GeohashingComic(object):
         self.im = Image.open("geohashingclean.png")
 
         # calculate the hash and new latitude and longitude
-        inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.year, self.month, self.day, self.dowjones)
-        mhash = hashlib.md5(inp)
-        hexdig = mhash.hexdigest()
-        digest = mhash.digest()
-        lato = struct.unpack(">Q", digest[0:8])[0] / (2. ** 64)
-        lono = struct.unpack(">Q", digest[8:16])[0] / (2. ** 64)
+        gh = Geohashing(self.year, self.month, self.day, self.dowjones)
 
         # read the digits (and the -), the dots don't move
         digits = {
@@ -81,7 +107,7 @@ class GeohashingComic(object):
 
         # write first half hash
         hofs = 301
-        for c in hexdig[0:16]:
+        for c in gh.hexdig[0:16]:
             self.im.paste(digits[c], (hofs, 82))
             self.im.paste(digits[c], (hofs - 9, 129))
             hofs += digits[c].size[0]
@@ -89,7 +115,7 @@ class GeohashingComic(object):
         hofs2 = 466
 
         # write second half hash
-        for c in hexdig[16:32]:
+        for c in gh.hexdig[16:32]:
             self.im.paste(digits[c], (hofs, 82))
             self.im.paste(digits[c], (hofs2, 129))
             hofs += digits[c].size[0]
@@ -134,7 +160,7 @@ class GeohashingComic(object):
                 hofs -= 2
 
         # lat/lon in final coordinates
-        for i, (c1, c2) in enumerate(zip(str(lato)[2:8], str(lono)[2:8])):
+        for i, (c1, c2) in enumerate(zip(str(gh.lato)[2:8], str(gh.lono)[2:8])):
             self.im.paste(digits[c1], (300 + 10 * i, 174))
             self.im.paste(digits[c1], (176 + 10 * i, 267))
             self.im.paste(digits[c2], (450 + 10 * i, 174))
