@@ -128,29 +128,59 @@ class GeohashingComic(object):
             hofs += self.digits[c].size[0]
             hofs2 += self.digits[c].size[0]
 
-    def draw_latitude(self):
+    def offset_latitude(self, i, c):
         """
-        Draw latitude.
+        Calculate offset for latitude drawing.
+        """
+        checks_raw = [
+            (True, 10),
+            (c == '1' and i > 3, -5),
+            (c == '.', 2),
+            (c == '-', -1),
+            (c == '+', -1),
+            (c == ' ', -2),
+        ]
+        offset_change = sum(change for check, change in checks_raw if check)
+        return offset_change
+
+    def draw_latitude_top(self):
+        """
+        Draw latitude top.
         """
         hofs = 25
         for i, c in enumerate("{:+10.6f}".format(self.gh.lat)):
             if c not in ' +.':
                 self.im.paste(self.digits[c], (hofs, 168))
-                if i < 3:
-                    self.im.paste(self.digits[c], (hofs + 110, 266))
 
-            checks_raw = [
-                (True, 10),
-                (c == '1' and i > 3, -5),
-                (c == '.', 2),
-                (c == '-', -1),
-                (c == '+', -1),
-                (c == ' ', -2),
-            ]
-            offset_change = sum(change for check, change in checks_raw if check)
-            hofs += offset_change
+            hofs += self.offset_latitude(i, c)
 
-    def draw_longitude(self):
+    def draw_latitude_bottom(self):
+        """
+        Draw latitude bottom.
+        """
+        hofs = 25 + 110
+        for i, c in enumerate("{:+10.6f}".format(self.gh.lat)):
+            if c not in ' +.' and i < 3:
+                self.im.paste(self.digits[c], (hofs, 266))
+
+            hofs += self.offset_latitude(i, c)
+
+    def offset_longitude(self, i, c):
+        """
+        Calculate offset for longitude drawing.
+        """
+        checks_raw = [
+            (True, 10),
+            (c == '1' and i > 4, -5),
+            (c == '.', 3),
+            (c == '-', -1),
+            (c == '+', -2),
+            (c == ' ', -2),
+        ]
+        offset_change = sum(change for check, change in checks_raw if check)
+        return offset_change
+
+    def draw_longitude_top(self):
         """
         Draw longitude.
         """
@@ -158,21 +188,19 @@ class GeohashingComic(object):
         for i, c in enumerate("{:+11.6f}".format(self.gh.lon)):
             if c not in ' +.':
                 self.im.paste(self.digits[c], (hofs, 169))
-                if i < 4:
-                    self.im.paste(self.digits[c], (hofs + 138, 269))
 
-            checks_raw = [
-                (True, 10),
-                (c == '1' and i > 4, -5),
-                (c == '.', 3),
-                (c == '-', -1),
-                (c == '+', -2),
-                (c == ' ', -2),
-            ]
-            offset_change = sum(change for check, change in checks_raw if check)
-            offset_change2 = sum(change for check, change in checks_raw if check)
-            offset_change3 = sum(change for check, change in checks_raw if check)
-            hofs += offset_change + offset_change2 - offset_change3
+            hofs += self.offset_longitude(i, c)
+
+    def draw_longitude_bottom(self):
+        """
+        Draw longitude.
+        """
+        hofs = 143 + 138
+        for i, c in enumerate("{:+11.6f}".format(self.gh.lon)):
+            if c not in ' +.' and i < 4:
+                self.im.paste(self.digits[c], (hofs, 269))
+
+            hofs += self.offset_longitude(i, c)
 
     def draw_coordinate_decimals(self):
         """
@@ -192,8 +220,10 @@ class GeohashingComic(object):
         self.draw_date()
         self.draw_dowjones()
         self.draw_hash()
-        self.draw_latitude()
-        self.draw_longitude()
+        self.draw_latitude_top()
+        self.draw_longitude_top()
+        self.draw_latitude_bottom()
+        self.draw_longitude_bottom()
         self.draw_coordinate_decimals()
 
     def show(self):
