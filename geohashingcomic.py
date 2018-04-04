@@ -35,11 +35,13 @@ class GeohashingComic(object):
         self.lat = lat
         self.lon = lon
 
-        self.im = Image.open("geohashingclean.png")
+        self.im = None
         # The final image.
 
     def make(self):
         """Creating the image"""
+
+        self.im = Image.open("geohashingclean.png")
 
         # calculate the hash and new latitude and longitude
         inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.year, self.month, self.day, self.dowjones)
