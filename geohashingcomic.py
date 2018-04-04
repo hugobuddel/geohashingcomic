@@ -22,13 +22,11 @@ class Geohashing(object):
     def __init__(self,
                  date,
                  dowjones=0.0,
-                 lat=37.421542,
-                 lon=-122.085589,
+                 location=(37.421542, -122.085589),
                  ):
         """date as datetime, dowjones, lat, lon as floats"""
         self.date = date
-        self.lat = lat
-        self.lon = lon
+        self.lat, self.lon = location
         self._dowjones = dowjones
 
         # calculate the hash and new latitude and longitude
@@ -71,12 +69,11 @@ class GeohashingComic(object):
     def __init__(self,
                  date=datetime.date(2005, 5, 26),
                  dowjones=10458.68,
-                 lat=37.421542,
-                 lon=-122.085589,
+                 location=(37.421542, -122.085589),
                  ):
 
-        # calculate the hash and new latitude and longitude
-        self.gh = Geohashing(date, dowjones, lat, lon)
+        self.gh = Geohashing(date, dowjones, location)
+        # Geohashing instance to calculate the hash and new latitude and longitude.
 
         self.im = None
         # The final image.
@@ -292,7 +289,7 @@ def main():
     args = parse_arguments()
 
     date = datetime.date(int(args['year']), int(args['month']), int(args['day']))
-    gc = GeohashingComic(date, float(args['dowjones']), float(args['lat']), float(args['lon']))
+    gc = GeohashingComic(date, float(args['dowjones']), (float(args['lat']), float(args['lon'])))
 
     if args['mode'] == 'cgi':
         gc.cgi()
