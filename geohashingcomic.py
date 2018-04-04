@@ -100,10 +100,13 @@ class GeohashingComic(object):
         """
         hofs = 165
         for i, c in enumerate("{:8.2f}".format(self.gh.dowjones)):
-            if i == 1:  # this is a 1
-                hofs -= 3
-            if i == 5:  # after the dot
-                hofs -= 3
+
+            checks_raw = [
+                (i == 1, -3),  # does this work properly when the DJ is above 20000?
+                (i == 5, -3),  # after the dot
+            ]
+            offset_change = sum(change for check, change in checks_raw if check)
+            hofs += offset_change
             if not (c == '.' or c == ' '):  # do not do the dot or spaces
                 self.im.paste(self.digits[c], (hofs + 10 * i, 78))
 
@@ -125,29 +128,59 @@ class GeohashingComic(object):
             hofs += self.digits[c].size[0]
             hofs2 += self.digits[c].size[0]
 
-    def draw_latitude(self):
+    def offset_latitude(self, i, c):
         """
-        Draw latitude.
+        Calculate offset for latitude drawing.
+        """
+        checks_raw = [
+            (True, 10),
+            (c == '1' and i > 3, -5),
+            (c == '.', 2),
+            (c == '-', -1),
+            (c == '+', -1),
+            (c == ' ', -2),
+        ]
+        offset_change = sum(change for check, change in checks_raw if check)
+        return offset_change
+
+    def draw_latitude_top(self):
+        """
+        Draw latitude top.
         """
         hofs = 25
         for i, c in enumerate("{:+10.6f}".format(self.gh.lat)):
             if c not in ' +.':
                 self.im.paste(self.digits[c], (hofs, 168))
-                if i < 3:
-                    self.im.paste(self.digits[c], (hofs + 110, 266))
-            hofs += 10
-            if c == '1' and i > 3:
-                hofs -= 5
-            if c == '.':
-                hofs += 2
-            if c == '-':
-                hofs -= 1
-            if c == '+':
-                hofs -= 1
-            if c == ' ':
-                hofs -= 2
 
-    def draw_longitude(self):
+            hofs += self.offset_latitude(i, c)
+
+    def draw_latitude_bottom(self):
+        """
+        Draw latitude bottom.
+        """
+        hofs = 25 + 110
+        for i, c in enumerate("{:+10.6f}".format(self.gh.lat)):
+            if c not in ' +.' and i < 3:
+                self.im.paste(self.digits[c], (hofs, 266))
+
+            hofs += self.offset_latitude(i, c)
+
+    def offset_longitude(self, i, c):
+        """
+        Calculate offset for longitude drawing.
+        """
+        checks_raw = [
+            (True, 10),
+            (c == '1' and i > 4, -5),
+            (c == '.', 3),
+            (c == '-', -1),
+            (c == '+', -2),
+            (c == ' ', -2),
+        ]
+        offset_change = sum(change for check, change in checks_raw if check)
+        return offset_change
+
+    def draw_longitude_top(self):
         """
         Draw longitude.
         """
@@ -155,19 +188,19 @@ class GeohashingComic(object):
         for i, c in enumerate("{:+11.6f}".format(self.gh.lon)):
             if c not in ' +.':
                 self.im.paste(self.digits[c], (hofs, 169))
-                if i < 4:
-                    self.im.paste(self.digits[c], (hofs + 138, 269))
-            hofs += 10
-            if c == '1' and i > 4:
-                hofs -= 5
-            if c == '.':
-                hofs += 3
-            if c == '-':
-                hofs -= 1
-            if c == '+':
-                hofs -= 2
-            if c == ' ':
-                hofs -= 2
+
+            hofs += self.offset_longitude(i, c)
+
+    def draw_longitude_bottom(self):
+        """
+        Draw longitude.
+        """
+        hofs = 143 + 138
+        for i, c in enumerate("{:+11.6f}".format(self.gh.lon)):
+            if c not in ' +.' and i < 4:
+                self.im.paste(self.digits[c], (hofs, 269))
+
+            hofs += self.offset_longitude(i, c)
 
     def draw_coordinate_decimals(self):
         """
@@ -187,8 +220,10 @@ class GeohashingComic(object):
         self.draw_date()
         self.draw_dowjones()
         self.draw_hash()
-        self.draw_latitude()
-        self.draw_longitude()
+        self.draw_latitude_top()
+        self.draw_longitude_top()
+        self.draw_latitude_bottom()
+        self.draw_longitude_bottom()
         self.draw_coordinate_decimals()
 
     def show(self):
@@ -220,21 +255,13 @@ class GeohashingComic(object):
         print d
 
 
-def main():
+def parse_arguments():
     """
-    Main method, either in CGI or command line mode.
+    Parse arguments.
+
+    :return: Arguments dictionary.
+    :type: dict
     """
-
-    if 'QUERY_STRING' in os.environ:
-        arg = urllib.unquote(os.environ['QUERY_STRING'])
-        mode = 'cgi'
-    elif len(sys.argv) > 1:
-        arg = urllib.unquote(sys.argv[-1])
-        mode = 'cmd'
-    else:
-        arg = ''
-        mode = 'cmd'
-
     args = {
         'year': 2005,
         'month': 5,
@@ -242,15 +269,32 @@ def main():
         'dowjones': 0.0,
         'lat': 37.421542,
         'lon': -122.085589,
+        'mode': 'cmd',
     }
+    arg = ''
+
+    if 'QUERY_STRING' in os.environ:
+        arg = urllib.unquote(os.environ['QUERY_STRING'])
+        args['mode'] = 'cgi'
+    elif len(sys.argv) > 1:
+        arg = urllib.unquote(sys.argv[-1])
+        args['mode'] = 'cmd'
 
     args2 = dict(a.split('=') for a in arg.split('&') if '=' in a)
     args.update(args2)
+    return args
+
+
+def main():
+    """
+    Main method, either in CGI or command line mode.
+    """
+    args = parse_arguments()
 
     date = datetime.date(int(args['year']), int(args['month']), int(args['day']))
     gc = GeohashingComic(date, float(args['dowjones']), float(args['lat']), float(args['lon']))
 
-    if mode == 'cgi':
+    if args['mode'] == 'cgi':
         gc.cgi()
     else:
         gc.show()
