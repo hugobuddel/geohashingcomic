@@ -29,18 +29,7 @@ class Geohashing(object):
         self.date = date
         self.lat = lat
         self.lon = lon
-        self.dowjones = dowjones
-
-        if not self.dowjones:
-            w30 = 0
-            if (self.lon > -30) and (self.date >= datetime.date(2008, 05, 27)):
-                w30 = 1
-            djia = urllib.urlopen(
-                (date - datetime.timedelta(w30)).strftime("http://irc.peeron.com/xkcd/map/data/%Y/%m/%d")).read()
-            if djia.find('404 Not Found') >= 0:
-                self.dowjones = 0.0
-            else:
-                self.dowjones = float(djia)
+        self._dowjones = dowjones
 
         # calculate the hash and new latitude and longitude
         inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.date.year, self.date.month, self.date.day, self.dowjones)
@@ -49,6 +38,23 @@ class Geohashing(object):
         digest = mhash.digest()
         self.lato = struct.unpack(">Q", digest[0:8])[0] / (2. ** 64)
         self.lono = struct.unpack(">Q", digest[8:16])[0] / (2. ** 64)
+
+    @property
+    def dowjones(self):
+        """
+        Fetch the Dow Jones index if necessary.
+        """
+        if not self._dowjones:
+            w30 = 0
+            if (self.lon > -30) and (self.date >= datetime.date(2008, 05, 27)):
+                w30 = 1
+            djia = urllib.urlopen(
+                (self.date - datetime.timedelta(w30)).strftime("http://irc.peeron.com/xkcd/map/data/%Y/%m/%d")).read()
+            if djia.find('404 Not Found') >= 0:
+                self._dowjones = -1.0
+            else:
+                self._dowjones = float(djia)
+        return self._dowjones
 
 
 class GeohashingComic(object):
