@@ -70,7 +70,7 @@ class CommandLineTest(unittest.TestCase):
         """
         Setup environment as-if this is a commandline environment.
         """
-        sys.argv.append("lat=-1&lon=-31&year")
+        sys.argv.append("lat=-1&lon=-29&year=2009&month")
 
     def tearDown(self):
         """
@@ -83,6 +83,23 @@ class CommandLineTest(unittest.TestCase):
         Test some manual input.
         """
         main()
+
+
+class ManualTest(unittest.TestCase):
+
+    def test2(self):
+        """
+        Test some manual input.
+        """
+        gc = GeohashingComic(year=2009, lat=1, lon=+29)
+        gc.show()
+
+    def test3(self):
+        """
+        Test some manual input.
+        """
+        gc = GeohashingComic(year=2009, lat=1, lon=-29, dowjones=0)
+        gc.cgi()
 
 
 if __name__ == '__main__':
