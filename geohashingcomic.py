@@ -56,6 +56,12 @@ class GeohashingComic(object):
     Class to create Geohashing Comics for any date.
     """
 
+    # read the digits (and the -), the dots don't move
+    digits = {
+        c: Image.open(c.replace("-", "m") + ".png")
+        for c in "0123456789abcdef-"
+    }
+
     def __init__(self,
                  date=datetime.date(2005, 5, 26),
                  dowjones=10458.68,
@@ -69,30 +75,23 @@ class GeohashingComic(object):
         self.im = None
         # The final image.
 
-    def make(self):
-        """Creating the image"""
-
-        self.im = Image.open("geohashingclean.png")
-
-        # read the digits (and the -), the dots don't move
-        digits = {
-            c: Image.open(c.replace("-", "m") + ".png")
-            for c in "0123456789abcdef-"
-        }
-
-        # write down the year
+    def draw_date(self):
+        """
+        Draw the year, month and day.
+        """
         for i, c in enumerate("{:04d}".format(self.gh.date.year)):
-            self.im.paste(digits[c], (24 + 12 * i, 78))
+            self.im.paste(self.digits[c], (24 + 12 * i, 78))
 
-        # write down the month
         for i, c in enumerate("{:02d}".format(self.gh.date.month)):
-            self.im.paste(digits[c], (88 + 11 * i, 78))
+            self.im.paste(self.digits[c], (88 + 11 * i, 78))
 
-        # write down the day
         for i, c in enumerate("{:02d}".format(self.gh.date.day)):
-            self.im.paste(digits[c], (120 + 12 * i, 78))
+            self.im.paste(self.digits[c], (120 + 12 * i, 78))
 
-        # write down the dow jones
+    def draw_dowjones(self):
+        """
+        Draw the dow jones index.
+        """
         hofs = 165
         for i, c in enumerate("{:8.2f}".format(self.gh.dowjones)):
             if i == 1:  # this is a 1
@@ -100,31 +99,36 @@ class GeohashingComic(object):
             if i == 5:  # after the dot
                 hofs -= 3
             if not (c == '.' or c == ' '):  # do not do the dot or spaces
-                self.im.paste(digits[c], (hofs + 10 * i, 78))
+                self.im.paste(self.digits[c], (hofs + 10 * i, 78))
 
-        # write first half hash
+    def draw_hash(self):
+        """
+        Draw first and second half of hash.
+        """
         hofs = 301
         for c in self.gh.hexdig[0:16]:
-            self.im.paste(digits[c], (hofs, 82))
-            self.im.paste(digits[c], (hofs - 9, 129))
-            hofs += digits[c].size[0]
+            self.im.paste(self.digits[c], (hofs, 82))
+            self.im.paste(self.digits[c], (hofs - 9, 129))
+            hofs += self.digits[c].size[0]
         hofs += 14
         hofs2 = 466
 
-        # write second half hash
         for c in self.gh.hexdig[16:32]:
-            self.im.paste(digits[c], (hofs, 82))
-            self.im.paste(digits[c], (hofs2, 129))
-            hofs += digits[c].size[0]
-            hofs2 += digits[c].size[0]
+            self.im.paste(self.digits[c], (hofs, 82))
+            self.im.paste(self.digits[c], (hofs2, 129))
+            hofs += self.digits[c].size[0]
+            hofs2 += self.digits[c].size[0]
 
-        # write latitude
+    def draw_latitude(self):
+        """
+        Draw latitude.
+        """
         hofs = 25
         for i, c in enumerate("{:+10.6f}".format(self.gh.lat)):
             if c not in ' +.':
-                self.im.paste(digits[c], (hofs, 168))
+                self.im.paste(self.digits[c], (hofs, 168))
                 if i < 3:
-                    self.im.paste(digits[c], (hofs + 110, 266))
+                    self.im.paste(self.digits[c], (hofs + 110, 266))
             hofs += 10
             if c == '1' and i > 3:
                 hofs -= 5
@@ -137,13 +141,16 @@ class GeohashingComic(object):
             if c == ' ':
                 hofs -= 2
 
-        # write longitude
+    def draw_longitude(self):
+        """
+        Draw longitude.
+        """
         hofs = 143
         for i, c in enumerate("{:+11.6f}".format(self.gh.lon)):
             if c not in ' +.':
-                self.im.paste(digits[c], (hofs, 169))
+                self.im.paste(self.digits[c], (hofs, 169))
                 if i < 4:
-                    self.im.paste(digits[c], (hofs + 138, 269))
+                    self.im.paste(self.digits[c], (hofs + 138, 269))
             hofs += 10
             if c == '1' and i > 4:
                 hofs -= 5
@@ -156,12 +163,27 @@ class GeohashingComic(object):
             if c == ' ':
                 hofs -= 2
 
-        # lat/lon in final coordinates
+    def draw_coordinate_decimals(self):
+        """
+        Draw decimals of lat/lon in final coordinates.
+        """
         for i, (c1, c2) in enumerate(zip(str(self.gh.lato)[2:8], str(self.gh.lono)[2:8])):
-            self.im.paste(digits[c1], (300 + 10 * i, 174))
-            self.im.paste(digits[c1], (176 + 10 * i, 267))
-            self.im.paste(digits[c2], (450 + 10 * i, 174))
-            self.im.paste(digits[c2], (335 + 10 * i, 269))
+            self.im.paste(self.digits[c1], (300 + 10 * i, 174))
+            self.im.paste(self.digits[c1], (176 + 10 * i, 267))
+            self.im.paste(self.digits[c2], (450 + 10 * i, 174))
+            self.im.paste(self.digits[c2], (335 + 10 * i, 269))
+
+    def make(self):
+        """Creating the image"""
+
+        self.im = Image.open("geohashingclean.png")
+
+        self.draw_date()
+        self.draw_dowjones()
+        self.draw_hash()
+        self.draw_latitude()
+        self.draw_longitude()
+        self.draw_coordinate_decimals()
 
     def show(self):
         """
