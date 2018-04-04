@@ -208,7 +208,10 @@ class GeohashingComic(object):
 
 
 def main():
-    arg = ''
+    """
+    Main method, either in CGI or command line mode.
+    """
+
     try:
         arg = urllib.unquote(os.environ['QUERY_STRING'])
         mode = 'cgi'
