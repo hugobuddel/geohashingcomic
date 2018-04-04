@@ -135,17 +135,16 @@ class GeohashingComic(object):
                 self.im.paste(self.digits[c], (hofs, 168))
                 if i < 3:
                     self.im.paste(self.digits[c], (hofs + 110, 266))
-            hofs += 10
-            if c == '1' and i > 3:
-                hofs -= 5
-            if c == '.':
-                hofs += 2
-            if c == '-':
-                hofs -= 1
-            if c == '+':
-                hofs -= 1
-            if c == ' ':
-                hofs -= 2
+            for check, change in [
+                (True, 10),
+                (c == '1' and i > 3, -5),
+                (c == '.', 2),
+                (c == '-', -1),
+                (c == '+', -1),
+                (c == ' ', -2),
+            ]:
+                if check:
+                    hofs += change
 
     def draw_longitude(self):
         """
@@ -157,17 +156,17 @@ class GeohashingComic(object):
                 self.im.paste(self.digits[c], (hofs, 169))
                 if i < 4:
                     self.im.paste(self.digits[c], (hofs + 138, 269))
-            hofs += 10
-            if c == '1' and i > 4:
-                hofs -= 5
-            if c == '.':
-                hofs += 3
-            if c == '-':
-                hofs -= 1
-            if c == '+':
-                hofs -= 2
-            if c == ' ':
-                hofs -= 2
+
+            for check, change in [
+                (True, 10),
+                (c == '1' and i > 4, -5),
+                (c == '.', 3),
+                (c == '-', -1),
+                (c == '+', -2),
+                (c == ' ', -2),
+            ]:
+                if check:
+                    hofs += change
 
     def draw_coordinate_decimals(self):
         """
