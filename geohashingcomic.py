@@ -213,15 +213,8 @@ def main():
     args['month'] = int(args['month'])
     args['day'] = int(args['day'])
     args['dowjones'] = float(args['dowjones'])
-    # -0 should not happen because you are supposed to enter floats, but still
-    if args['lat'] == '-0':
-        args['lat'] = -0.0
-    else:
-        args['lat'] = float(args['lat'])
-    if args['lon'] == '-0':
-        args['lon'] = -0.0
-    else:
-        args['lon'] = float(args['lon'])
+    args['lat'] = float(args['lat'])
+    args['lon'] = float(args['lon'])
 
     if not args['dowjones']:
         w30 = 0
