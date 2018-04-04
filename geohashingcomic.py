@@ -20,25 +20,20 @@ class Geohashing(object):
     """
 
     def __init__(self,
-                 year=2005,
-                 month=5,
-                 day=26,
+                 date,
                  dowjones=0.0,
                  lat=37.421542,
                  lon=-122.085589,
                  ):
-        """year, month, day as ints, dowjones, lat, lon as floats"""
-        self.year = year
-        self.month = month
-        self.day = day
+        """date as datetime, dowjones, lat, lon as floats"""
+        self.date = date
         self.lat = lat
         self.lon = lon
         self.dowjones = dowjones
 
         if not self.dowjones:
             w30 = 0
-            date = datetime.date(self.year, self.month, self.day)
-            if (self.lon > -30) and (date >= datetime.date(2008, 05, 27)):
+            if (self.lon > -30) and (self.date >= datetime.date(2008, 05, 27)):
                 w30 = 1
             djia = urllib.urlopen(
                 (date - datetime.timedelta(w30)).strftime("http://irc.peeron.com/xkcd/map/data/%Y/%m/%d")).read()
@@ -48,7 +43,7 @@ class Geohashing(object):
                 self.dowjones = float(djia)
 
         # calculate the hash and new latitude and longitude
-        inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.year, self.month, self.day, self.dowjones)
+        inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.date.year, self.date.month, self.date.day, self.dowjones)
         mhash = hashlib.md5(inp)
         self.hexdig = mhash.hexdigest()
         digest = mhash.digest()
@@ -62,16 +57,14 @@ class GeohashingComic(object):
     """
 
     def __init__(self,
-                 year=2005,
-                 month=5,
-                 day=26,
+                 date=datetime.date(2005, 5, 26),
                  dowjones=10458.68,
                  lat=37.421542,
                  lon=-122.085589,
                  ):
 
         # calculate the hash and new latitude and longitude
-        self.gh = Geohashing(year, month, day, dowjones, lat, lon)
+        self.gh = Geohashing(date, dowjones, lat, lon)
 
         self.im = None
         # The final image.
@@ -88,15 +81,15 @@ class GeohashingComic(object):
         }
 
         # write down the year
-        for i, c in enumerate("{:04d}".format(self.gh.year)):
+        for i, c in enumerate("{:04d}".format(self.gh.date.year)):
             self.im.paste(digits[c], (24 + 12 * i, 78))
 
         # write down the month
-        for i, c in enumerate("{:02d}".format(self.gh.month)):
+        for i, c in enumerate("{:02d}".format(self.gh.date.month)):
             self.im.paste(digits[c], (88 + 11 * i, 78))
 
         # write down the day
-        for i, c in enumerate("{:02d}".format(self.gh.day)):
+        for i, c in enumerate("{:02d}".format(self.gh.date.day)):
             self.im.paste(digits[c], (120 + 12 * i, 78))
 
         # write down the dow jones
@@ -191,7 +184,7 @@ class GeohashingComic(object):
         # there should be a better way to do this
         # self.im.save('/dev/stdout',format)
         fn = "comics/{:d}-{:d}-{:d}_{:f}_{:f}_{:f}.png".format(
-            self.gh.year, self.gh.month, self.gh.day, self.gh.dowjones, self.gh.lat, self.gh.lon)
+            self.gh.date.year, self.gh.date.month, self.gh.date.day, self.gh.dowjones, self.gh.lat, self.gh.lon)
         self.im.save(fn, format)
         oo = open(fn)
         d = oo.read()
@@ -251,7 +244,8 @@ def main():
     args['lat'] = float(args['lat'])
     args['lon'] = float(args['lon'])
 
-    gc = GeohashingComic(args['year'], args['month'], args['day'], args['dowjones'], args['lat'], args['lon'])
+    date = datetime.date(args['year'], args['month'], args['day'])
+    gc = GeohashingComic(date, args['dowjones'], args['lat'], args['lon'])
     gc.make()
     if mode == 'cgi':
         gc.cgi()
