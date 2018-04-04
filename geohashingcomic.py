@@ -219,21 +219,13 @@ class GeohashingComic(object):
         print d
 
 
-def main():
+def parse_arguments():
     """
-    Main method, either in CGI or command line mode.
+    Parse arguments.
+
+    :return: Arguments dictionary.
+    :type: dict
     """
-
-    arg = ''
-    mode = 'cmd'
-
-    if 'QUERY_STRING' in os.environ:
-        arg = urllib.unquote(os.environ['QUERY_STRING'])
-        mode = 'cgi'
-    elif len(sys.argv) > 1:
-        arg = urllib.unquote(sys.argv[-1])
-        mode = 'cmd'
-
     args = {
         'year': 2005,
         'month': 5,
@@ -241,15 +233,32 @@ def main():
         'dowjones': 0.0,
         'lat': 37.421542,
         'lon': -122.085589,
+        'mode': 'cmd',
     }
+    arg = ''
+
+    if 'QUERY_STRING' in os.environ:
+        arg = urllib.unquote(os.environ['QUERY_STRING'])
+        args['mode'] = 'cgi'
+    elif len(sys.argv) > 1:
+        arg = urllib.unquote(sys.argv[-1])
+        args['mode'] = 'cmd'
 
     args2 = dict(a.split('=') for a in arg.split('&') if '=' in a)
     args.update(args2)
+    return args
+
+
+def main():
+    """
+    Main method, either in CGI or command line mode.
+    """
+    args = parse_arguments()
 
     date = datetime.date(int(args['year']), int(args['month']), int(args['day']))
     gc = GeohashingComic(date, float(args['dowjones']), float(args['lat']), float(args['lon']))
 
-    if mode == 'cgi':
+    if args['mode'] == 'cgi':
         gc.cgi()
     else:
         gc.show()
