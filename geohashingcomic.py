@@ -175,7 +175,7 @@ def main():
     except KeyError:
         if len(sys.argv) > 1:
             # arg = sys.argv[1]
-            arg = urllib.unquote(sys.argv[1])
+            arg = urllib.unquote(sys.argv[-1])
         else:
             arg = ''
         mode = 'cmd'
