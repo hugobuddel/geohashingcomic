@@ -202,7 +202,6 @@ def main():
         mode = 'cgi'
     except KeyError:
         if len(sys.argv) > 1:
-            # arg = sys.argv[1]
             arg = urllib.unquote(sys.argv[-1])
         else:
             arg = ''
@@ -212,31 +211,14 @@ def main():
         'year': 2005,
         'month': 5,
         'day': 26,
-        # 'dowjones': 10458.68,
         'dowjones': 0.0,
         'lat': 37.421542,
         'lon': -122.085589,
     }
 
-    try:
-        al = arg.split('&')
-        for a in al:
-            # print a
-            (key, value) = a.split('=')
-            # if (key[-2:] == '[]'):
-            #    key = key[:-2]
-            #    if (alist.has_key(key)):
-            #        alist[key].append(value)
-            #    else:
-            #        alist[key] = [value]
-            # else:
-            #    alist[key] = value
-            args[key] = value
-    except ValueError:
-        pass
-        # raise
+    args2 = dict(a.split('=') for a in arg.split('&') if '=' in a)
+    args.update(args2)
 
-    # print args
     args['year'] = int(args['year'])
     args['month'] = int(args['month'])
     args['day'] = int(args['day'])
