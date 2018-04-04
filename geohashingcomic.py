@@ -224,14 +224,14 @@ def main():
     Main method, either in CGI or command line mode.
     """
 
+    arg = ''
+    mode = 'cmd'
+
     if 'QUERY_STRING' in os.environ:
         arg = urllib.unquote(os.environ['QUERY_STRING'])
         mode = 'cgi'
     elif len(sys.argv) > 1:
         arg = urllib.unquote(sys.argv[-1])
-        mode = 'cmd'
-    else:
-        arg = ''
         mode = 'cmd'
 
     args = {
