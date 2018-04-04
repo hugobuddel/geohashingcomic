@@ -37,8 +37,8 @@ class MyTest(unittest.TestCase):
 class UrlTest(unittest.TestCase):
 
     fn_test = "mytest2.png"
-    fn_ok = "comics/2005-5-26_10458.680000_37.421542_-122.085589.png"
-    query_string = "year=2005&month=5&day=26&dowjones=10458.68&lat=37.421542&lon=-122.085589"
+    fn_ok = "comics/2009-5-26_8292.210000_37.421542_22.085589.png"
+    query_string = "year=2009&month=5&day=26&lat=37.421542&lon=+22.085589"
 
     def setUp(self):
         """
@@ -91,15 +91,23 @@ class ManualTest(unittest.TestCase):
         """
         Test some manual input.
         """
-        gc = GeohashingComic(year=2009, lat=1, lon=+29)
+        gc = GeohashingComic(year=2009, lat=1, lon=+29, dowjones=0)
         gc.show()
 
     def test3(self):
         """
         Test some manual input.
         """
-        gc = GeohashingComic(year=2009, lat=1, lon=-29, dowjones=0)
+        gc = GeohashingComic(year=2009, lat=1, lon=-29)
         gc.cgi()
+
+    def tearDown(self):
+        """
+        Remove temporary file.
+        """
+        fn = "comics/2009-5-26_10458.680000_1.000000_-29.000000.png"
+        if os.path.exists(fn):
+            os.remove(fn)
 
 
 if __name__ == '__main__':
