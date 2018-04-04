@@ -219,14 +219,14 @@ def main():
     Main method, either in CGI or command line mode.
     """
 
-    try:
+    if 'QUERY_STRING' in os.environ:
         arg = urllib.unquote(os.environ['QUERY_STRING'])
         mode = 'cgi'
-    except KeyError:
-        if len(sys.argv) > 1:
-            arg = urllib.unquote(sys.argv[-1])
-        else:
-            arg = ''
+    elif len(sys.argv) > 1:
+        arg = urllib.unquote(sys.argv[-1])
+        mode = 'cmd'
+    else:
+        arg = ''
         mode = 'cmd'
 
     args = {
@@ -241,16 +241,9 @@ def main():
     args2 = dict(a.split('=') for a in arg.split('&') if '=' in a)
     args.update(args2)
 
-    args['year'] = int(args['year'])
-    args['month'] = int(args['month'])
-    args['day'] = int(args['day'])
-    args['dowjones'] = float(args['dowjones'])
-    args['lat'] = float(args['lat'])
-    args['lon'] = float(args['lon'])
+    date = datetime.date(int(args['year']), int(args['month']), int(args['day']))
+    gc = GeohashingComic(date, float(args['dowjones']), float(args['lat']), float(args['lon']))
 
-    date = datetime.date(args['year'], args['month'], args['day'])
-    gc = GeohashingComic(date, args['dowjones'], args['lat'], args['lon'])
-    gc.make()
     if mode == 'cgi':
         gc.cgi()
     else:
