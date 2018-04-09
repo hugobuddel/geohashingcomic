@@ -25,7 +25,14 @@ class Geohashing(object):
         self.date = date
         self.lat, self.lon = location
         self._dowjones = dowjones
-        self._hexdig, self._lato, self._lono = None, None, None
+        self._hexdig = None
+        self._lato = None
+        self._lono = None
+        self.calculate_hashes()
+        self.calculate_hashes()
+        self.calculate_hashes()
+        self.calculate_hashes()
+        self.calculate_hashes()
 
     def calculate_hashes(self):
         """
