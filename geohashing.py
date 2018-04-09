@@ -25,14 +25,46 @@ class Geohashing(object):
         self.date = date
         self.lat, self.lon = location
         self._dowjones = dowjones
+        self._hexdig, self._lato, self._lono = None, None, None
 
+    def calculate_hashes(self):
+        """
+        Calculate hashes.
+        """
         # calculate the hash and new latitude and longitude
         inp = "{:4d}-{:02d}-{:02d}-{:0.2f}".format(self.date.year, self.date.month, self.date.day, self.dowjones)
         mhash = hashlib.md5(inp)
-        self.hexdig = mhash.hexdigest()
+        self._hexdig = mhash.hexdigest()
         digest = mhash.digest()
-        self.lato = struct.unpack(">Q", digest[0:8])[0] / (2. ** 64)
-        self.lono = struct.unpack(">Q", digest[8:16])[0] / (2. ** 64)
+        self._lato = struct.unpack(">Q", digest[0:8])[0] / (2. ** 64)
+        self._lono = struct.unpack(">Q", digest[8:16])[0] / (2. ** 64)
+
+    @property
+    def hexdig(self):
+        """
+        Return hexdig.
+        """
+        if self._hexdig is None:
+            self.calculate_hashes()
+        return self._hexdig
+
+    @property
+    def lato(self):
+        """
+        Return lato.
+        """
+        if self._lato is None:
+            self.calculate_hashes()
+        return self._lato
+
+    @property
+    def lono(self):
+        """
+        Return lono.
+        """
+        if self._lono is None:
+            self.calculate_hashes()
+        return self._lono
 
     @property
     def dowjones(self):
